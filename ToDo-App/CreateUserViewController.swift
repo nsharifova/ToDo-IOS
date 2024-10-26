@@ -12,44 +12,34 @@ class CreateUserViewController: UIViewController {
     @IBOutlet weak var saveButton: UIBarButtonItem!
     @IBOutlet weak var lastnameLabel: UITextField!
     @IBOutlet weak var firstNameLabel: UITextField!
+    
+    var completion: (() -> Void)?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
     }
     
-    
     @IBAction func saveAction(_ sender: Any) {
         if (firstNameLabel.text != ""  && lastnameLabel.text != "") {
             let appDelegate = UIApplication.shared.delegate as! AppDelegate
             let context = appDelegate.persistentContainer.viewContext
-            let newUser = NSEntityDescription.insertNewObject(forEntityName: "Users", into: context)
-            newUser.setValue(firstNameLabel.text, forKey: "firstname")
-            newUser.setValue(lastnameLabel.text, forKey: "lastname")
-            newUser.setValue(UUID(), forKey: "id")
+            let newUser = Users(context:context)
+            newUser.firstname = firstNameLabel.text
+            newUser.lastname = lastnameLabel.text
+            newUser.id = UUID()
+        
             do {
                 try context.save()
+                completion?()
                 self.navigationController?.popViewController(animated: true)
-                NotificationCenter.default.post(name: NSNotification.Name("newUser"), object: nil)
-                
-                
+
             }
             catch {
                 print("error")
             }
+        } else {
+          showAlert(title: "Warning", message: "Please fill the fileds")
         }
-        else {
-            let alertController = UIAlertController(title: "Message", message: "Please fill the fields", preferredStyle: .alert)
-            
-            let okAction = UIAlertAction(title: "OK", style: .default) { _ in
-            }
-            
-            alertController.addAction(okAction)
-            
-            present(alertController, animated: true, completion: nil)
-            
-        }
-        
     }
-    
-    
 }
